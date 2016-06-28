@@ -1075,6 +1075,10 @@ int wl_android_priv_cmd(struct net_device *net, struct ifreq *ifr, int cmd)
 		ret = -EINVAL;
 		goto exit;
 	}
+	if (!capable(CAP_NET_ADMIN)) {
+		ret = -EPERM;
+		goto exit;
+	}
 	if (copy_from_user(&priv_cmd, ifr->ifr_data, sizeof(android_wifi_priv_cmd))) {
 		ret = -EFAULT;
 		goto exit;
@@ -1455,6 +1459,18 @@ void *wifi_get_country_code(char *ccode)
 	return NULL;
 }
 #endif /* (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 39)) */
+
+bool wifi_process_partial_resume(int action)
+{
+#ifdef CONFIG_PARTIALRESUME
+	if (wifi_control_data && wifi_control_data->partial_resume) {
+		return wifi_control_data->partial_resume(action);
+	}
+	return false;
+#else
+	return false;
+#endif
+}
 
 static int wifi_set_carddetect(int on)
 {
