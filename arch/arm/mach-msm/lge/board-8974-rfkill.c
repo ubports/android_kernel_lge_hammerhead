@@ -191,6 +191,10 @@ static int bluetooth_set_power(void *data, bool blocked)
 		gpio_direction_output(GPIO_BT_RESET_N, 0);
 		printk(KERN_ERR "Bluetooth RESET LOW!!");
 	}
+
+#ifdef CONFIG_BCM4335BT
+	bcm_bt_unlock(lock_cookie_bt);
+#endif /* CONFIG_BCM4335BT */
 	return 0;
 }
 
